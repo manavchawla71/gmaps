@@ -1,4 +1,11 @@
 #map {
   height: 100vh; /* Or any specific height you need */
   width: 100%;
+  flex: 1;
+}
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
 }
