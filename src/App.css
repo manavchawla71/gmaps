@@ -2,7 +2,9 @@
   height: 100vh; /* Or any specific height you need */
   width: 100%;
   flex: 1;
+  cursor: default !important;
 }
+
 html,
 body {
   height: 100%;
