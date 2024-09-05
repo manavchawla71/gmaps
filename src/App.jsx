@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-
+import { PiMapPinLight } from "react-icons/pi";
+import axios from "axios";
 import {
   MapContainer,
   TileLayer,
@@ -9,16 +10,32 @@ import {
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import "./App.css";
+import { renderToString } from "react-dom/server";
 
+const iconHtml = renderToString(<PiMapPinLight size={32} color="red" />);
+const customIcon = new L.DivIcon({
+  html: `<div style="font-size:32px; color:red;">${iconHtml}</div>`,
+  className: "custom-icon",
+  iconSize: [32, 32],
+  iconAnchor: [16, 32],
+  popupAnchor: [0, -32],
+});
 function MapClickHandler({ setMarkerData }) {
   useMapEvents({
     click(e) {
       const { lat, lng } = e.latlng;
-      setMarkerData({
-        lat,
-        lng,
-        place: `(${lat.toFixed(4)}, ${lng.toFixed(4)})`,
-      });
+      axios
+        .get(
+          `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`
+        )
+        .then((response) => {
+          var placename = response.data.display_name;
+          setMarkerData({
+            lat,
+            lng,
+            placename,
+          });
+        });
     },
   });
   return null;
@@ -44,9 +61,8 @@ function App() {
   return (
     <>
       <MapContainer
-        // onclick={handle}
         center={[28.892549, 76.5954186]}
-        zoom={9}
+        zoom={5}
         scrollWheelZoom={true}
         id="map"
       >
@@ -61,8 +77,12 @@ function App() {
           </Marker>
         )}
         {markerData && (
-          <Marker position={[markerData.lat, markerData.lng]}>
-            <Popup>{markerData.place}</Popup>
+          <Marker position={[markerData.lat, markerData.lng]} icon={customIcon}>
+            <Popup>
+              {markerData.placename}
+              <br />
+              {`(${markerData.lat.toFixed(4)}, ${markerData.lng.toFixed(4)})`}
+            </Popup>
           </Marker>
         )}
       </MapContainer>
